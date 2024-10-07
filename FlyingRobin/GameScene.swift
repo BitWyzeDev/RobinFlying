@@ -13,7 +13,6 @@ class GameScene: SKScene {
     
     var robinCharacter: SKSpriteNode!
     
-    
     override func didMove(to view: SKView) {
         self.backgroundColor = SKColor.white
         let screenWidth = self.size.width
@@ -44,10 +43,15 @@ class GameScene: SKScene {
 
         // Step 4: Run the animation repeatedly
         let repeatAnimation = SKAction.repeatForever(animationAction)
-        let flightPath = getFlightPath(x: x, y: y)
-        let flyAcrossScreen = SKAction.group([flightPath, repeatAnimation])
-        let repeatFlight = SKAction.repeatForever(flyAcrossScreen)
-        robinCharacter.run(repeatFlight)
+        robinCharacter.run(repeatAnimation)
+        
+        // Step 5: Run the flight animation in a loop
+        runFlightAnimation()
+        
+//        let flightPath = getFlightPath(x: x, y: y)
+//        let flyAcrossScreen = SKAction.group([flightPath, repeatAnimation])
+//        let repeatFlight = SKAction.repeatForever(flyAcrossScreen)
+//        robinCharacter.run(repeatFlight)
     }
     
     // Calculate a flight path
@@ -62,6 +66,29 @@ class GameScene: SKScene {
         let followPath = SKAction.follow(path, asOffset: false, orientToPath: false, duration: 5.0)
         return followPath
     }
+    
+    // Function to run the flight path
+        func runFlightAnimation() {
+            // Set the starting position to the left of the screen
+            let startX = -robinCharacter.size.width // Start off-screen on the left
+            let y = self.size.height * 0.5
+            robinCharacter.position = CGPoint(x: startX, y: y)
+            
+            // Define the flight path from left to right
+            let flightPath = SKAction.move(to: CGPoint(x: self.size.width + robinCharacter.size.width, y: y + 100), duration: 5.0)
+            
+            // Reset the position and repeat the flight
+            let resetPosition = SKAction.run { [weak self] in
+                self?.robinCharacter.position = CGPoint(x: startX, y: y)
+            }
+            
+            // Sequence of flight path and reset position
+            let flyAndReset = SKAction.sequence([flightPath, resetPosition])
+            
+            // Repeat the flight forever
+            let repeatFlight = SKAction.repeatForever(flyAndReset)
+            robinCharacter.run(repeatFlight)
+        }
 
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
