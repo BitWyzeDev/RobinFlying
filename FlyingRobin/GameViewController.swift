@@ -14,8 +14,8 @@ protocol MyGameSceneDelegate: AnyObject {
 }
 
 class GameViewController: UIViewController, MyGameSceneDelegate {
-    @IBOutlet weak var xValue: UILabel!
-    @IBOutlet weak var yValue: UILabel!
+
+    @IBOutlet weak var posLabel: UILabel!
     
     var gameScene: GameScene?
     
@@ -46,11 +46,17 @@ class GameViewController: UIViewController, MyGameSceneDelegate {
     }
     
     func onTouchDown(pos: CGPoint) {
-        let stringXValue = "\(pos.x)"
-        xValue.text = stringXValue
-        let stringYValue = "\(pos.y)"
-        yValue.text = stringYValue
+        let posString = String(format: "x: %.1f, y: %.1f", pos.x, pos.y)
+        posLabel.text = posString
     }
     
+    func convertToSpriteKitCoordinates(uiPoint: CGPoint) -> CGPoint {
+        // Get the center of the screen
+        let centerX = self.view.frame.width / 2
+        let centerY = self.view.frame.height / 2
+        
+        // Convert to SpriteKit coordinates
+        return CGPoint(x: uiPoint.x - centerX, y: uiPoint.y - centerY)
+    }
 }
 

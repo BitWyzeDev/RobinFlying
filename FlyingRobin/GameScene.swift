@@ -11,6 +11,7 @@ import GameplayKit
 class GameScene: SKScene {
     weak var sceneDelegate: MyGameSceneDelegate?
     var robinCharacter: SKSpriteNode!
+    var flightPathAction: SKAction?
     
     override func didMove(to view: SKView) {
         self.backgroundColor = SKColor.white
@@ -102,10 +103,27 @@ class GameScene: SKScene {
 //        if let label = self.label {
 //            label.run(SKAction.init(named: "Pulse")!, withKey: "fadeInOut")
 //        }
-//        
-        for t in touches {
-            self.touchDown(atPoint: t.location(in: self))
+//
+        // Get the first touch in the set
+        if let touch = touches.first {
+            // Get the location of the touch in the scene's coordinate system
+            let location = touch.location(in: self)
+            
+            // Create an action to move the sprite to the touch location
+            let moveAction = SKAction.move(to: location, duration: 0.5)
+            
+            // Optionally, add an easing effect if desired (e.g., ease-in-out)
+            moveAction.timingMode = .easeInEaseOut
+            
+            robinCharacter.removeAllActions()
+            // Run the move action on the sprite
+            robinCharacter.run(moveAction)
+            debugPrint("touch.location: \(touch.location(in: self))")
+            self.touchDown(atPoint: touch.location(in: self))
         }
+//        for t in touches {
+//            self.touchDown(atPoint: t.location(in: self))
+//        }
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
