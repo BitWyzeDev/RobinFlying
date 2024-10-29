@@ -26,6 +26,13 @@
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="x:       y:       " textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0aZ-ab-Gto">
+                                        <rect key="frame" x="8" y="35" width="324" height="21"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
                                 </subviews>
                                 <color key="backgroundColor" systemColor="systemGray5Color"/>
                                 <constraints>
@@ -42,6 +49,7 @@
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="angleLabel" destination="0aZ-ab-Gto" id="w8b-TN-GOA"/>
                         <outlet property="posLabel" destination="x9V-4k-rph" id="fqp-Hk-F2e"/>
                     </connections>
                 </viewController>

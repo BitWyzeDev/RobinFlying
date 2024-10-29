@@ -11,7 +11,8 @@ import GameplayKit
 class GameScene: SKScene {
     weak var sceneDelegate: MyGameSceneDelegate?
     var robinCharacter: SKSpriteNode!
-    var flightPathAction: SKAction?
+    var repeatFlightAction: SKAction?
+    var continueFlying = false   // if this is true the Robin continues to fly in the same direction past where the user tapped
     
     override func didMove(to view: SKView) {
         self.backgroundColor = SKColor.white
@@ -84,7 +85,7 @@ class GameScene: SKScene {
             flightPath.addLine(to: CGPoint(x: 500, y: 100))
             // Create an action with the flight path
             let flightAction = SKAction.follow(flightPath, asOffset: false, orientToPath: false, duration: 5.0)
-
+            
             // Reset the position and repeat the flight
             let resetPosition = SKAction.run { [weak self] in
                 self?.robinCharacter.position = CGPoint(x: startX, y: y)
@@ -95,35 +96,56 @@ class GameScene: SKScene {
             
             // Repeat the flight forever
             let repeatFlight = SKAction.repeatForever(flyAndReset)
-            robinCharacter.run(repeatFlight)
+            robinCharacter.run(repeatFlight, withKey: "repeatFlightAction")
+            self.repeatFlightAction = repeatFlight
         }
 
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-//        if let label = self.label {
-//            label.run(SKAction.init(named: "Pulse")!, withKey: "fadeInOut")
-//        }
-//
         // Get the first touch in the set
         if let touch = touches.first {
             // Get the location of the touch in the scene's coordinate system
             let location = touch.location(in: self)
             
+            // Calculate the angle between the current position and the touch location
+            let dx = location.x - robinCharacter.position.x
+            let dy = location.y - robinCharacter.position.y
+            let angle = atan2(dy, dx)  // Calculate angle in radians
+            
+            // Rotate the robinCharacter to point towards the destination
+            robinCharacter.zRotation = angle
+            
+            // If we are moving right to left we need to flip the Robin to point to the left instead of the right so it is not flying upside down!
+            
+            // Determine the direction of movement
+            let movingLeft = location.x < robinCharacter.position.x
+            
+            // Flip the sprite based on the direction
+//            robinCharacter.xScale = movingLeft ? -1 : 1
+            
             // Create an action to move the sprite to the touch location
-            let moveAction = SKAction.move(to: location, duration: 0.5)
+            var moveAction = SKAction.move(to: location, duration: 0.5)
+            if continueFlying {
+                // Calculate an extended destination point (e.g., 200 points beyond the touch location)
+                let distance: CGFloat = 200  // Distance beyond the touch point
+                let extendedX = location.x + cos(angle) * distance
+                let extendedY = location.y + sin(angle) * distance
+                let extendedPoint = CGPoint(x: extendedX, y: extendedY)
+                moveAction = SKAction.move(to: extendedPoint, duration: 0.5)
+            }
             
             // Optionally, add an easing effect if desired (e.g., ease-in-out)
             moveAction.timingMode = .easeInEaseOut
             
-            robinCharacter.removeAllActions()
+            // Stop the current repeating flight path
+            robinCharacter.removeAction(forKey: "repeatFlightAction")
             // Run the move action on the sprite
             robinCharacter.run(moveAction)
-            debugPrint("touch.location: \(touch.location(in: self))")
-            self.touchDown(atPoint: touch.location(in: self))
+            let position = touch.location(in: self)
+            debugPrint("touch.location: \(position)")
+            sceneDelegate?.onTouchDown(pos: position, angle: angle)
+//            self.touchDown(atPoint: touch.location(in: self))
         }
-//        for t in touches {
-//            self.touchDown(atPoint: t.location(in: self))
-//        }
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -145,7 +167,7 @@ class GameScene: SKScene {
     
     // The user has tapped the screen. Make the bird fly in this direction
     
-    func touchDown(atPoint pos : CGPoint) {
-        sceneDelegate?.onTouchDown(pos: pos)
-    }
+//    func touchDown(atPoint pos : CGPoint) {
+//        sceneDelegate?.onTouchDown(pos: pos)
+//    }
 }
