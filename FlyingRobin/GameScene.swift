@@ -40,7 +40,7 @@ class GameScene: SKScene {
         robinCharacter.setScale(0.25)
         
         // Step 3: Create an animation action
-        let animationAction = SKAction.animate(with: frames, timePerFrame: 0.1, resize: false, restore: true)
+        let animationAction = SKAction.animate(with: frames, timePerFrame: 0.05, resize: false, restore: true)
 
         // Step 4: Run the animation repeatedly
         let repeatAnimation = SKAction.repeatForever(animationAction)
@@ -72,23 +72,37 @@ class GameScene: SKScene {
         func runFlightAnimation() {
             // Set the starting position to the left of the screen
             let startX = -robinCharacter.size.width // Start off-screen on the left
-            let y = self.size.height * 0.5
-            robinCharacter.position = CGPoint(x: startX, y: y)
+            let startY = self.size.height * 0.5
+            robinCharacter.position = CGPoint(x: startX, y: startY)
             
             // Define the flight path from left to right up by 100 pixels
           //  let flightPath = SKAction.move(to: CGPoint(x: self.size.width + robinCharacter.size.width, y: y + 100), duration: 5.0)
             
-            // Define the flight path
+            // Define the horizontal distance for the bird to travel
+            let endX = self.size.width + robinCharacter.size.width
+            let amplitude: CGFloat = 40.0  // Amplitude of the sine wave (height of oscillation)
+            let frequency: CGFloat = 0.05   // Frequency of the sine wave (how quickly it oscillates)
+            
+            // Define a sinusoidal flight path
             var flightPath = CGMutablePath()
-            flightPath.move(to: CGPoint(x: 100, y: 100))
-            flightPath.addCurve(to: CGPoint(x: 400, y: 400), control1: CGPoint(x: 150, y: 300), control2: CGPoint(x: 300, y: 200))
-            flightPath.addLine(to: CGPoint(x: 500, y: 100))
-            // Create an action with the flight path
+            flightPath.move(to: CGPoint(x: startX, y: startY))
+            for x in stride(from: startX, to: endX, by: 100) {
+                let y = startY + amplitude * sin(frequency * x)
+                flightPath.addLine(to: CGPoint(x: x, y: y))
+            }
+            // Create an action to follow the sine path
             let flightAction = SKAction.follow(flightPath, asOffset: false, orientToPath: false, duration: 5.0)
+                
+// Old flight path CODE ======
+//            flightPath.move(to: CGPoint(x: 100, y: 100))
+//            flightPath.addCurve(to: CGPoint(x: 400, y: 400), control1: CGPoint(x: 150, y: 300), control2: CGPoint(x: 300, y: 200))
+//            flightPath.addLine(to: CGPoint(x: 500, y: 100))
+            // Create an action with the flight path
+//            let flightAction = SKAction.follow(flightPath, asOffset: false, orientToPath: false, duration: 5.0)
             
             // Reset the position and repeat the flight
             let resetPosition = SKAction.run { [weak self] in
-                self?.robinCharacter.position = CGPoint(x: startX, y: y)
+                self?.robinCharacter.position = CGPoint(x: startX, y: startY)
             }
             
             // Sequence of flight path and reset position
