@@ -9,8 +9,7 @@ import SpriteKit
 import GameplayKit
 
 class GameScene: SKScene {
-    
-    
+    weak var sceneDelegate: MyGameSceneDelegate?
     var robinCharacter: SKSpriteNode!
     
     override func didMove(to view: SKView) {
@@ -74,16 +73,24 @@ class GameScene: SKScene {
             let y = self.size.height * 0.5
             robinCharacter.position = CGPoint(x: startX, y: y)
             
-            // Define the flight path from left to right
-            let flightPath = SKAction.move(to: CGPoint(x: self.size.width + robinCharacter.size.width, y: y + 100), duration: 5.0)
+            // Define the flight path from left to right up by 100 pixels
+          //  let flightPath = SKAction.move(to: CGPoint(x: self.size.width + robinCharacter.size.width, y: y + 100), duration: 5.0)
             
+            // Define the flight path
+            var flightPath = CGMutablePath()
+            flightPath.move(to: CGPoint(x: 100, y: 100))
+            flightPath.addCurve(to: CGPoint(x: 400, y: 400), control1: CGPoint(x: 150, y: 300), control2: CGPoint(x: 300, y: 200))
+            flightPath.addLine(to: CGPoint(x: 500, y: 100))
+            // Create an action with the flight path
+            let flightAction = SKAction.follow(flightPath, asOffset: false, orientToPath: false, duration: 5.0)
+
             // Reset the position and repeat the flight
             let resetPosition = SKAction.run { [weak self] in
                 self?.robinCharacter.position = CGPoint(x: startX, y: y)
             }
             
             // Sequence of flight path and reset position
-            let flyAndReset = SKAction.sequence([flightPath, resetPosition])
+            let flyAndReset = SKAction.sequence([flightAction, resetPosition])
             
             // Repeat the flight forever
             let repeatFlight = SKAction.repeatForever(flyAndReset)
@@ -96,7 +103,9 @@ class GameScene: SKScene {
 //            label.run(SKAction.init(named: "Pulse")!, withKey: "fadeInOut")
 //        }
 //        
-//        for t in touches { self.touchDown(atPoint: t.location(in: self)) }
+        for t in touches {
+            self.touchDown(atPoint: t.location(in: self))
+        }
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -114,5 +123,11 @@ class GameScene: SKScene {
     
     override func update(_ currentTime: TimeInterval) {
         // Called before each frame is rendered
+    }
+    
+    // The user has tapped the screen. Make the bird fly in this direction
+    
+    func touchDown(atPoint pos : CGPoint) {
+        sceneDelegate?.onTouchDown(pos: pos)
     }
 }
